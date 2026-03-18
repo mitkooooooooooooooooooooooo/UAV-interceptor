@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shield of the Desert - UAE AA Defense</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #050510;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #game-container {
+            position: relative;
+        }
+        canvas {
+            border: 2px solid #2d5a27;
+            box-shadow: 0 0 20px rgba(45, 90, 39, 0.5);
+            background: black;
+        }
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #00ff00;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="hud">
+            SYSTEM: ONLINE<br>
+            STATUS: ACTIVE DEFENSE
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

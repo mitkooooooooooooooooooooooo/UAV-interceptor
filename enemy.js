@@ -1,19 +1,20 @@
 import { FSM } from './fsm.js';
 
-export class Drone {
-    constructor(x, y) {
+export class Enemy {
+    constructor(x, y, type = 'DRONE') {
         this.x = x;
         this.y = y;
-        this.speed = 1.5;
+        this.type = type; 
+        this.speed = type === 'ROCKET' ? 3 : 1.5;
         this.health = 100;
-        this.radius = 12;
+        this.radius = type === 'ROCKET' ? 8 : 15;
         this.fsm = new FSM('SPAWN');
         this.setupFSM();
     }
 
     setupFSM() {
         this.fsm.addState('SPAWN', {
-            update: (e) => { e.y += 0.5; },
+            update: (e) => { e.y += 1; },
             transitions: { 'CRUISE': (e) => e.y > 50 }
         });
 
@@ -27,11 +28,12 @@ export class Drone {
 
         this.fsm.addState('LOCK', {
             update: (e, p) => { 
-                e.y += 0.8; 
-                e.x += (e.x < p.x) ? 0.4 : -0.4; 
+                e.y += this.type === 'ROCKET' ? 2 : 0.8; 
+                e.x += (e.x < p.x) ? 0.5 : -0.5; 
             },
             transitions: { 
-                'EVADE': (e) => e.y > 250,
+                'EVADE': (e) => e.y > 250 && this.type === 'DRONE',
+                'KAMIKAZE': (e) => e.y > 250 && this.type === 'ROCKET',
                 'DEAD': (e) => e.health <= 0 
             }
         });
@@ -41,7 +43,7 @@ export class Drone {
                 e.x += Math.sin(Date.now() / 150) * 4; 
                 e.y += 0.3; 
             },
-            transitions: { 'KAMIKAZE': (e) => e.y > 450 }
+            transitions: { 'KAMIKAZE': (e) => e.y > 450, 'DEAD': (e) => e.health <= 0 }
         });
 
         this.fsm.addState('KAMIKAZE', {
@@ -50,7 +52,7 @@ export class Drone {
         });
 
         this.fsm.addState('DEAD', {
-            update: (e) => { e.radius *= 0.9; },
+            update: (e) => { e.radius *= 0.8; },
             transitions: {}
         });
     }
@@ -60,17 +62,19 @@ export class Drone {
     }
 
     draw(ctx) {
-        ctx.fillStyle = this.fsm.state === 'KAMIKAZE' ? '#ff4d00' : '#ff0000';
+        ctx.fillStyle = this.type === 'ROCKET' ? '#ffaa00' : '#ff0000';
         ctx.beginPath();
-        ctx.moveTo(this.x, this.y - this.radius);
-        ctx.lineTo(this.x + this.radius, this.y + this.radius);
-        ctx.lineTo(this.x - this.radius, this.y + this.radius);
-        ctx.closePath();
+        if (this.type === 'ROCKET') {
+            ctx.rect(this.x - 5, this.y - 15, 10, 30);
+        } else {
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        }
         ctx.fill();
         
         ctx.fillStyle = 'white';
-        ctx.font = '10px Monospace';
+        ctx.font = 'bold 10px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(this.fsm.state, this.x, this.y - 15);
+        ctx.fillText(this.type, this.x, this.y - 20);
+        ctx.fillText(this.fsm.state, this.x, this.y + 25);
     }
 }
